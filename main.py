@@ -59,15 +59,14 @@ def apply_heavy_salt_pepper_noise(image, noise_prob=0.1):
     return noisy
 
 
-def kalman_filter_image(noisy_frame):
-    """Альтернативная реализация фильтрации с использованием временного сглаживания"""
-    if not hasattr(kalman_filter_image, "prev_frame"):
-        kalman_filter_image.prev_frame = noisy_frame
+def filter_image(noisy_frame):
+    if not hasattr(filter_image, "prev_frame"):
+        filter_image.prev_frame = noisy_frame
 
-    # Простое временное сглаживание (имитация фильтра Калмана)
+    # Простое временное сглаживание
     alpha = 0.8  # Коэффициент сглаживания
-    filtered = cv2.addWeighted(noisy_frame, alpha, kalman_filter_image.prev_frame, 1 - alpha, 0)
-    kalman_filter_image.prev_frame = filtered.copy()
+    filtered = cv2.addWeighted(noisy_frame, alpha, filter_image.prev_frame, 1 - alpha, 0)
+    filter_image.prev_frame = filtered.copy()
 
     return filtered
 
@@ -88,9 +87,9 @@ def main():
         # 2. Кадр с сильным шумом "соль-перец"
         noisy = apply_heavy_salt_pepper_noise(frame, noise_prob=0.2)
 
-        # 3. Отфильтрованный кадр (медианный + временное сглаживание)
+        # 3. Отфильтрованный кадр
         denoised = cv2.medianBlur(noisy, 5)
-        filtered = kalman_filter_image(denoised)
+        filtered = filter_image(denoised)
 
         # Масштабируем кадры для отображения
         scale_percent = 70
@@ -107,7 +106,7 @@ def main():
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
         cv2.putText(noisy_resized, "Salt & Pepper Noise", (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-        cv2.putText(filtered_resized, "Kalman Filter", (10, 30),
+        cv2.putText(filtered_resized, "Filter", (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
         cv2.putText(filtered_resized, "Press 'E' to quit", (10, 330),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
